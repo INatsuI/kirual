@@ -1,10 +1,10 @@
 const Discord = require ('discord.js');
 const bot = new Discord.Client();
 
-var prefix = ("!")
+var prefix = ("k!")
 
 bot.on('ready', function() {
-    bot.user.setGame("キルア | ! | NoxLord  ", 'https://www.twitch.tv/gotaga')
+    bot.user.setGame("キルア | k! | NoxLord  ", 'https://www.twitch.tv/gotaga')
     console.log("Go");
 
 bot.on("guildMemberAdd", member => {
