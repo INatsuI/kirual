@@ -31,7 +31,8 @@ bot.on('message', message => {
     command = args.shift().toLowerCase();
 
     if(message.content.startsWith("^^^^purge")){
-
+        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR'))
+  
         message.channel.bulkDelete(99).then(() =>{
             message.channel.send(``).then(msg => msg.delete(99))
         });
