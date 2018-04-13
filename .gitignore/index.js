@@ -108,7 +108,7 @@ bot.on('message', message => {
             .addBlankField()
             .addField("k!ban (@Utilisateur) (Raison)", "Permet de bannir un utilisateur de votre discord !")
             .addField("k!kick (@Utilisateur) (Raison)", "Permet d'expulser un utilisateur de votre discord !")
-            .addField("k!Sondage (ex : Aimez-vous les pommes ?)", "Permet de faire un sondage !")
+            .addField("k!Sondage (ex : Aimez-vous les pommes ?)", "Permet de faire un sondage ! - En maintenance !")
             .addField("k!InfoDiscord ", "Permet de vous donner les info du discord !")
             .addField("k!Twitter ", "Permet de vous donner le Twitter du serveur et celui de KiruaHan !")
             .addField("k!Recrutement ", "Vous donne les critères de recrutement ainsi que d'autre informations au sujet du recrutement staff ! - Soon")
