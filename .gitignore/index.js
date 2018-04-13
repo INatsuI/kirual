@@ -48,7 +48,7 @@ bot.on('message', message => {
     }
 
     if(message.content.startsWith(prefix + "kick")) {
-        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR')){
+        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR')
         var member= message.mentions.members.first();
         if(!member) {
             return message.reply("Utilisateur introuvable / Impossible a expulser / Aucun Utilisateur a été détecté !").catch(console.error);
@@ -70,7 +70,7 @@ bot.on('message', message => {
     }
 
     if(message.content.startsWith(prefix + "ban")) {
-        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR')){
+        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR'))
         var member= message.mentions.members.first();
         if(!member) {
             return message.reply("Utilisateur introuvable / Impossible a expulser / Aucun Utilisateur a été détecté !").catch(console.error);
@@ -173,4 +173,4 @@ bot.on('message', message => {
             message.channel.sendEmbed(help_embed);
     
     };
-}}});
+});
