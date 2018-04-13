@@ -138,7 +138,7 @@ bot.on('message', message => {
             .addField("Ce discord possèdent " , message.guild.memberCount + " Utilisateurs")
             .addField("Ping bot : " , `${bot.ping}ms`)
             .addBlankField()
-            .setColor("#F58800")
+            .setColor("#D473D4")
             message.channel.sendEmbed(help_embed);
 
     }
