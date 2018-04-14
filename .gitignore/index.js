@@ -153,6 +153,19 @@ bot.on('message', message => {
             .addBlankField()
             message.channel.sendEmbed(help_embed);
     }
+    
+    if (message.content === prefix + "Recrutement"){
+        var help_embed = new Discord.RichEmbed()
+            .setColor('#D473D4')
+            .setAuthor("キルア  | Recrutement ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
+            .addBlankField()
+            .addField("Gardes : ", 'Assisatant | Modérateur')
+            .addBlankField()
+            .addField("Conditions", "Avoir minimum 14 ans.\n Avoir un français correct.\n Etre Mature\n Avoir de l'exprérience dans le domaine\n Savoir verif(Seulement pour modérateur).\Faire une candidature de 25 lignes minimum avant un maximum d'informations.\n L'envoyer dans le salon Candidature dans le serveur discord ! ")
+            message.channel.sendEmbed(help_embed);
+    
+    
+    }
 
     if (message.content === prefix + "Partenaire"){
         var help_embed = new Discord.RichEmbed()
@@ -162,6 +175,7 @@ bot.on('message', message => {
             .addField("Partenaires (1) :", 'City Police Secours RP : https://discord.gg/qBD9c')
             .addBlankField()
             message.channel.sendEmbed(help_embed);
+    
     
     }
 
