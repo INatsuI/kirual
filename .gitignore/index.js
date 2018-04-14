@@ -17,7 +17,7 @@ bot.on("guildMemberAdd", member => {
         .addField("Mes commandes ", "Tu peut faire k!Aide pour connaitre mes commandes.")
         .addField("Nombres d'utilisateurs : ",  message.guild.memberCount )
         .addBlankField()
-    clientDiscord.channels.get("433977747740688385").send(join_embed);
+    clientDiscord.channels.get("433977747740688385").sendEmbed(join_embed);
 })
 
 bot.on("guildMemberAdd", member => {
