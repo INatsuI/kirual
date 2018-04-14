@@ -8,7 +8,16 @@ bot.on('ready', function() {
     console.log("Go");
 
 bot.on("guildMemberAdd", member => {
-    member.guild.channels.find("name", "bienvenue").send(`Bienvenue ${member.user.username} sur le discord de NoxLord !`)
+    var join_embed = new Discord.RichEmbed()
+        .setColor('#D473D4')
+        .setAuthor("Bienvenue ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
+        .addBlankField()
+        .addField("Un nouvel utilisateur vient d'arriver !", `${member.user.username}`)
+        .addField("Tu a des questions ?", "Tu peut poser tes questions au membres du staff !")
+        .addField("Mes commandes ", "Tu peut faire k!Aide pour connaitre mes commandes.")
+        .addField("Nombres d'utilisateurs : ",  message.guild.memberCount )
+        .addBlankField()
+    clientDiscord.channels.get("433977747740688385").send(join_embed);
 })
 
 bot.on("guildMemberAdd", member => {
