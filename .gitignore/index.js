@@ -161,7 +161,7 @@ bot.on('message', message => {
             .addBlankField()
             .addField("Gardes : ", 'Assisatant | Modérateur')
             .addBlankField()
-            .addField("Conditions : ", "Avoir minimum 14 ans.\nAvoir un français correct.\nEtre Mature.\nAvoir de l'exprérience dans le domaine\n Savoir verif(Seulement pour modérateur).\nFaire une candidature de 25 lignes minimum avant un maximum d'informations.\nL'envoyer dans le salon Candidature dans le serveur discord ! ")
+            .addField("Conditions : ", "Avoir minimum 14 ans.\nAvoir un français correct.\nEtre Mature.\nAvoir de l'exprérience dans le domaine.\nSavoir verif(Seulement pour modérateur).\nFaire une candidature de 25 lignes minimum avant un maximum d'informations.\nL'envoyer dans le salon Candidature sur le serveur discord ! ")
             message.author.sendEmbed(help_embed);
     
     
