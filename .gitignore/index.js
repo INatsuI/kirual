@@ -159,7 +159,7 @@ bot.on('message', message => {
             .setColor('#D473D4')
             .setAuthor("キルア  | Recrutement ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
             .addBlankField()
-            .addField("Gardes : ", 'Assisatant | Modérateur')
+            .addField("Gardes : ", 'Assistant | Modérateur')
             .addBlankField()
             .addField("Conditions : ", "Avoir minimum 14 ans.\nAvoir un français correct.\nEtre Mature.\nAvoir de l'exprérience dans le domaine.\nSavoir verif(Seulement pour modérateur).\nFaire une candidature de 25 lignes minimum avant un maximum d'informations.\nL'envoyer dans le salon Candidature sur le serveur discord ! ")
             message.author.sendEmbed(help_embed);
