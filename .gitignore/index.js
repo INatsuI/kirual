@@ -172,7 +172,7 @@ bot.on('message', message => {
             .setColor('#D473D4')
             .setAuthor("キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
             .addBlankField()
-            .addField("Partenaires (1) :", 'City Police Secours RP : https://discord.gg/qBD9c')
+            .addField("Partenaires (1) :", 'City Police Secours RP : https://discord.gg/qBD9c\nXéneria : https://discord.gg/7Txm5')
             .addBlankField()
             message.channel.sendEmbed(help_embed);
     
@@ -184,7 +184,7 @@ bot.on('message', message => {
             .setColor('#D473D4')
             .setAuthor("キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
             .addBlankField()
-            .addField("Twitter :", 'Twitter de KiruaHan : Soon\nTwitter du serveur : Soon')
+            .addField("Twitter :", 'Twitter de KiruaHan : Soon\nTwitter du serveur : https://twitter.com/NoxLordNetwork')
             .addBlankField()
             message.channel.sendEmbed(help_embed);
     
