@@ -1,192 +1,295 @@
 const Discord = require ('discord.js');
+const queue = new Map();
+const YTDL = require("ytdl-core");
 const bot = new Discord.Client();
+const ffmpeg = require("ffmpeg-binaries");
 
-var prefix = ("k!")
+var prefix = ("O!");
+
+var autorole = ("🌀- Visiteur");
+
+var bienvenuem = ("Bienvenue");
+
+var servers = {};
+
+
+function play(connection, message) {
+    var server = servers[message.guild.id];
+       
+       server.dispatcher = connection.playStream(YTDL(server.queue[0], {filter: "audioonly"}));
+       
+       server.queue.shift();
+       
+       server.dispatcher.on("end", function() {
+        if (server.queue[0]) play(connection, message);
+        else connection.disconnect();
+        var help_embed = new Discord.RichEmbed()
+        .setAuthor("✔ Deconection de la Musique !")
+        .setColor("#77B5FE")
+        message.channel.sendEmbed(help_embed);
+    });
+}
+
+bot.on("guildMemberAdd", member =>{
+    if(!member.guild.roles.find('name', role)) return console.log("Role inconnu");
+    member.addRole(member.guild.roles.find('name', autorole));
+})
 
 bot.on('ready', function() {
-    bot.user.setGame("キルア | k! | NoxLord  ", 'https://www.twitch.tv/gotaga')
+    bot.user.setGame("OyoRi | " + (bot.users.size - 1) + " Membre(s) | " + bot.guilds.size + " Serveur(s) !", "https://www.twitch.tv/Méliodas")
     console.log("Go");
 
+
 bot.on("guildMemberAdd", member => {
-    member.guild.channels.find("name", "bienvenue").send(`Bienvenue ${member.user.username} sur le discord de NoxLord !`)
+    bot.user.setGame("OyoRi | " + (bot.users.size - 1) + " Membre(s) | " + bot.guilds.size + " Serveur(s) !", "https://www.twitch.tv/Méliodas")
 
 })
 
 bot.on("guildMemberAdd", member => {
-    let role = member.guild.roles.find("name", "Nox'Joueur")
-    member.addRole(role)
+    const embed = new Discord.RichEmbed()
+      .setColor('#77B5FE')
+      .setAuthor(member.user.tag, member.user.avatarURL)
+      .setTitle("Un nouvel utilisateur vient d'arriver", `Il s'agit de [${member.user.tag}](https://discordapp.com/)`, true)
+      .addField("Comment connaitre mon fonctionnement ? ", "Je t'invite a exécuter la command : " + prefix )
+      .addField(`Nombre de membres après l'arrivée de ${member.user.tag}`, member.guild.memberCount)
+      .setTimestamp()
+member.guild.channels.find("name", bienvenuem).send({embed})
+
 })
-    
-    
-bot.on("guildMemberRemove", member =>{
-        member.guild.channels.find("name", "bienvenue").send(`A plus ${member.user.username} reviens quand tu veux dans le discord de NoxLord !`) 
+
+bot.on("guildMemberRemove", member => {
+    const embed = new Discord.RichEmbed()
+    bot.user.setGame("OyoRi | " + (bot.users.size - 1) + " Membre(s) | " + bot.guilds.size + " Serveur(s) !", "https://www.twitch.tv/Méliodas")
+    .setColor('#77B5FE')
+    .setAuthor(member.user.tag, member.user.avatarURL)
+    .setTitle("Départ d'un utilisateur")
+    .addField("Il s'agit de : ", `[${member.user.tag}](https://discordapp.com/)`, true)
+    .addField(`Nombre de membres après le départ de ${member.user.tag}`, member.guild.memberCount)
+    .setTimestamp()
+    member.guild.channels.find("name", bienvenuem).send({embed})
 })
 
 });
 
 bot.login(process.env.TOKEN);
 
-bot.on('message', message => {
+bot.on("message", function(message) {
+    if (message.author.equals(bot.user)) return;
+    
+    if (!message.content.startsWith(prefix)) return;
+    
+    var args = message.content.substring(prefix.length).split(" ");
+    
+    switch (args[0].toLowerCase()) {
+        case "play":
+            if (!args[1]) {
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("❌ Veuillez mettre un lien !")
+                .setColor("#850606")
+                message.channel.sendEmbed(help_embed);             
+                return;
+            }
+            if(!message.member.voiceChannel) {
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("❌ Vous devez être dans un salon vocal ! !")
+                .setColor("#850606")
+                message.channel.sendEmbed(help_embed);             
+                return;
+            }
+            
+            if(!servers[message.guild.id]) servers[message.guild.id] = {
+                queue: []
+            };
+            
+            var server = servers[message.guild.id];
+      
+            server.queue.push(args[1]);
+            
+            if(!message.guild.voiceConnection) message.member.voiceChannel.join().then(function(connection) {
+               play(connection, message) 
+               var help_embed = new Discord.RichEmbed()
+               .setAuthor("✔ Musique en cours !")
+               .setColor("#77B5FE")
+               message.channel.sendEmbed(help_embed);
+            });
+        break;    
+      
+        case "skip":
+             if(!message.member.voiceChannel) {
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("❌ Vous devez être dans un salon vocal !")
+                .setColor("#850606")
+                message.channel.sendEmbed(help_embed);   
+                return;
+            }
+            var server = servers[message.guild.id];
+            if(server.dispatcher) server.dispatcher.end();
+            var help_embed = new Discord.RichEmbed()
+            .setAuthor("✔ Musique Skip !")
+            .setColor("#77B5FE")
+            message.channel.sendEmbed(help_embed);
+        break;    
+      
+        case "stop":
+             if(!message.member.voiceChannel) {
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("❌ Vous devez être dans un salon vocal !")
+                .setColor("#850606")
+                message.channel.sendEmbed(help_embed);             
+                return;
+            }
+             const serverQueue = queue.get(message.guild.id);
+             var server = servers[message.guild.id];
+             if (!serverQueue) return message.channel.send("Aucune musique est joué !")
+            if(message.guild.voiceConnection) message.guild.voiceConnection.disconnect();
+     
+        break;
+        }
+    }
+);
+
+bot.on("message", async function(message) {
     let command = message.content.split(" ")[0];
     const args = message.content.slice(prefix.length).split(/ +/);
     command = args.shift().toLowerCase();
 
-    if(message.content.startsWith("^^^^purge")){
-        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR'))
-  
-        message.channel.bulkDelete(99).then(() =>{
-            message.channel.send(``).then(msg => msg.delete(99))
-        });
-
-        var help_embed = new Discord.RichEmbed()
-        .setColor('#D473D4')
-        .setTitle("**Information :**                         ")
-        .addBlankField()
-        .addField("Commande :", "Purge                               ")
-        .addField("Exécuteur : ", "" + message.member + "              ")
-        .addBlankField()
-        .addField("Info :", "Purge = - 99 Messgaes ")
-        message.channel.sendEmbed(help_embed);
-    }
 
     if(message.content.startsWith(prefix + "kick")) {
-        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR'))
+        let Perm = message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR');
         var member= message.mentions.members.first();
-        if(!member) {
-            return message.reply("Utilisateur introuvable / Impossible a expulser / Aucun Utilisateur a été détecté !").catch(console.error);
+
+        if(!Perm) {
+            var help_embed = new Discord.RichEmbed()
+            .setAuthor("❌ Erreur : ❌")
+            .addField("Erreur :", "Permission Refusé !")
+            .setColor("#850606")
+            message.channel.sendEmbed(help_embed);
         }
-        if(!args[1]) return message.reply("Veuillez mettre la raison du kick !");
-        // Kick
+    
+        if(!member) {
+            var help_embed = new Discord.RichEmbed()
+            .setAuthor("❌ Erreur : ❌")
+            .addField("Erreur :", "Utilisateur non mentionner / Invalide !")
+            .setColor("#850606")
+            message.channel.sendEmbed(help_embed);
+        }
+        if(Perm) {
+
         member.kick().then((member) => {
             var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setTitle("**Informations Kick :**")
-            .addBlankField()
-            .addField("**Utilisateur kick :**",  "" + member.displayName + "" )
-            .addField("**Exécuteur :**", "" + message.member + "" )
-            .addField("**Raison :**", `${args[1]}` )
-            .addBlankField()
+            .addField("Commande :", "Kick")
+            .addField("Utilisateur :", member.displayName)
+            .addField("Modérateur :", message.member)
+            .addField("Heure:", message.channel.createdAt)
+            .setColor("#77B5FE")
+            .setAuthor(message.author.username, message.author.avatarURL)
+            .setTimestamp()
             message.channel.sendEmbed(help_embed);
+        
         }).catch(() => {
-        })
-    }
-
-    if(message.content.startsWith(prefix + "ban")) {
-        if(message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR'))
-        var member= message.mentions.members.first();
-        if(!member) {
-            return message.reply("Utilisateur introuvable / Impossible a expulser / Aucun Utilisateur a été détecté !").catch(console.error);
         }
-        if(!args[1]) return message.reply("Veuillez mettre la raison du bannisement !");
-        // Ban
-        member.ban().then((member) => {
-        // Successmessage
+        )
+    }
+    }
+
+
+    if(message.content.startsWith(prefix + "Aide")){
         var help_embed = new Discord.RichEmbed()
-        .setColor('#D473D4')
-        .setTitle("**Informations Bannisement :**")
-        .addBlankField()
-        .addField("**Utilisateur banni :**",  "" + member.displayName + "" )
-        .addField("**Exécuteur :**", "" + message.member + "" )
-        .addField("**Raison :**", `${args[1]}` )
-        .addBlankField()
+        .setAuthor("✔ Tu vien de recevoir l'aide en message privé !")
+        .setColor("#3AF24B")
         message.channel.sendEmbed(help_embed);
-        }).catch(() => {
-
-        })
-    }
-    if(message.content === prefix + 'renchannel'){
-        var interval = setInterval (function (){
-              message.guild.channels.find('id',"433977187545120768")
-              .setName("🎌 NoxLord 🎌 👥 "+`${message.guild.members.filter(m => m.presence.status !== 'offline').size} / ${message.guild.memberCount}`+"");
-        }, 1000); // intervalle entre les envoi de packet
-        console.log("Commande Renchannel demandée !");
-    }
-
-    if (message.content === prefix + 'Aide'){
-        message.reply ("Tu vien de recevoir l'aide en message privé !");
         var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setAuthor("Help | Aide | キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("k!ban (@Utilisateur) (Raison)", "Permet de bannir un utilisateur de votre discord !")
-            .addField("k!kick (@Utilisateur) (Raison)", "Permet d'expulser un utilisateur de votre discord !")
-            .addField("k!Sondage (ex : Aimez-vous les pommes ?)", "Permet de faire un sondage ! - En maintenance !")
-            .addField("k!InfoDiscord ", "Permet de vous donner les info du discord !")
-            .addField("k!Twitter ", "Permet de vous donner le Twitter du serveur et celui de KiruaHan !")
-            .addField("k!Recrutement ", "Vous donne les critères de recrutement ainsi que d'autre informations au sujet du recrutement staff ! - Soon")
-            .addField("k!Partenaire ", "Vous donne le nom de tout nos partenaire !")
-            .addField("k!ping ", "Permet de vous donner votre ping ! - Soon")
-            .addBlankField()
-            .setFooter("Fait par キルア - Han")
+            .setColor('#77B5FE')
+            .setAuthor(message.author.username, message.author.avatarURL)
+            .setDescription("Voici les commandes du bot !")
+            .addField("O!ban (@Utilisateur) (Raison)", "Permet de bannir un utilisateur de votre discord !")
+            .addField("O!kick (@Utilisateur) (Raison)", "Permet d'expulser un utilisateur de votre discord !")
+            .addField("O!mute (@Utilisateur) (Raison)", "Permet de rendre muet un utilisateur de votre serveur discord !")
+            .addField("O!unmute (@Utilisateur) (Raison)", "Permet de rendre unmuet un utilisateur de votre serveur discord !")
+            .addField("O!Sondage (ex : Aimez-vous les pommes ?)", "Permet de faire des sondages ! - En maintenance !")
+            .addField("O!InfoDiscord ", "Permet de vous donner les info du discord !")
+            .addField("O!ping ", "Permet d'avoir le ping du discord ")
+            .setTimestamp()
             message.author.sendEmbed(help_embed); 
     
     }
 
-    if(message.content === prefix + "ping"){
-        const then = Date.now();
-        message.channel.send('Pinging...').then(m =>{
-            m.edit(`Ping du bot : ${bot.ping}ms`);
-        });
-    }
+    if(message.content.startsWith(prefix + "ban")) {
+        let Perm = message.guild.members.get(message.author.id).permissions.has('ADMINISTRATOR');
+        var member= message.mentions.members.first();
 
-    if(message.content === prefix + "Discordinfo"){
-        var help_embed = new Discord.RichEmbed()
-            .setAuthor("Informations Discord | キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("Nom du discord : " , message.guild.name)
-            .addField("Crée le : " , message.guild.createdAt)
-            .addField("Tu nous a rejoin le : " , message.member.joinedAt)
-            .addField("Ce discord possèdent " , message.guild.memberCount + " Utilisateurs")
-            .addField("Ping bot : " , `${bot.ping}ms`)
-            .addBlankField()
-            .setColor("#D473D4")
+        if(!Perm) {
+            var help_embed = new Discord.RichEmbed()
+            .setAuthor("❌ Erreur : ❌")
+            .addField("Erreur :", "Permission Refusé !")
+            .setColor("#850606")
             message.channel.sendEmbed(help_embed);
-
-    }
-
-    if (message.content === prefix ){
-        var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setAuthor("キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("k!Aide", "Permet de vous donner tout les commandes disponnibles !")
-            .addBlankField()
+        }
+    
+        if(!member) {
+            var help_embed = new Discord.RichEmbed()
+            .setAuthor("❌ Erreur : ❌")
+            .addField("Erreur :", "Utilisateur non Mentionner / Invalide !")
+            .setColor("#850606")
             message.channel.sendEmbed(help_embed);
-    }
-    
-    if (message.content === prefix + "Recrutement"){
+        }
+        if(Perm) {
+        // Ban
+        member.ban().then((member) => {
+        // Successmessage
         var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setAuthor("キルア  | Recrutement ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("Gardes : ", 'Assistant | Modérateur')
-            .addBlankField()
-            .addField("Conditions : ", "Avoir minimum 14 ans.\nAvoir un français correct.\nEtre Mature.\nAvoir de l'exprérience dans le domaine.\nSavoir verif(Seulement pour modérateur).\nFaire une candidature de 25 lignes minimum avant un maximum d'informations.\nL'envoyer dans le salon Candidature sur le serveur discord ! ")
-            message.author.sendEmbed(help_embed);
-    
-    
-    }
+        .addField("Commande :", "Ban")
+        .addField("Utilisateur :", member.displayName)
+        .addField("Modérateur :", message.member)
+        .addField("Heure:", message.channel.createdAt)
+        .setColor("#77B5FE")
+        .setAuthor(message.author.username, message.author.avatarURL)
+        .setTimestamp()
+        message.channel.sendEmbed(help_embed);
+        }).catch(() => {
 
-    if (message.content === prefix + "Partenaire"){
-        var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setAuthor("キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("Partenaires (1) :", 'City Police Secours RP : https://discord.gg/qBD9c\nXéneria : https://discord.gg/7Txm5')
-            .addBlankField()
-            message.channel.sendEmbed(help_embed);
-    
-    
+        })
     }
+    }
+        if(message.content.startsWith(prefix + "changeprefix")){
+            if(message.member.permissions.has('ADMINISTRATOR')){
+                if(!args[0]) {
+                    var help_embed = new Discord.RichEmbed()
+                    .setAuthor("❌ Erreur : ❌")
+                    .addField("Erreur :", "Veuillez mettre le prefix que vous voulez !")
+                    .setColor("#850606")
+                    message.channel.sendEmbed(help_embed);
+                }
+                if(args[0]) {
+                    prefix = args[0]
+                    var help_embed = new Discord.RichEmbed()
+                    .setAuthor("✔ Succès : ")
+                    .addField("Nouveau prefix :", `${args[0]}`)
+                    .setColor("#77B5FE")
+                    message.channel.sendEmbed(help_embed);               
+                }  
 
-    if (message.content === prefix + "Twitter"){
-        var help_embed = new Discord.RichEmbed()
-            .setColor('#D473D4')
-            .setAuthor("キルア ", 'https://orig00.deviantart.net/4c8f/f/2014/134/0/e/profile_picture_by_kirua_zoldyk-d7ibe7e.png')
-            .addBlankField()
-            .addField("Twitter :", 'Twitter de KiruaHan : Soon\nTwitter du serveur : https://twitter.com/NoxLordNetwork')
-            .addBlankField()
-            message.channel.sendEmbed(help_embed);
-    
-    };
-});
+    } 
+
+
+    if(message.content.startsWith(prefix + "messagebienvenue")){
+        if(message.member.permissions.has('ADMINISTRATOR')){
+            if(!args[0]) {
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("❌ Erreur : ❌")
+                .addField("Erreur :", "Veuillez mettre le channel de bienvenue que vous voulez !")
+                .setColor("#850606")
+                message.channel.sendEmbed(help_embed);
+            }
+            if(args[0]) {
+                bienvenuem = args[0]
+                var help_embed = new Discord.RichEmbed()
+                .setAuthor("✔ Succès : ")
+                .addField("Nouveau channel :", `${args[0]}`)
+                .setColor("#77B5FE")
+                message.channel.sendEmbed(help_embed);   
+            }
+  
+        };
+
+}}});
