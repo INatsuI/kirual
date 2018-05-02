@@ -1,12 +1,5 @@
 const Discord = require ('discord.js');
 const bot = new Discord.Client();
-const sf = require('snekfetch');
-const snek = require("snekfetch");
-const ansicolors = require("ansicolors");
-const Hentai = require("hentai.js");
-
-const hentaiClient = new Hentai();
-
 
 
 
