@@ -1,7 +1,5 @@
 const Discord = require ('discord.js');
 const bot = new Discord.Client();
-const Fortnite = require("fortnite")
-const ft = new Fortnite('957da0fc-0278-4d0b-883d-5346fb02bcaa');
 const sf = require('snekfetch');
 const snek = require("snekfetch");
 const ansicolors = require("ansicolors");
