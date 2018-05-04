@@ -7,8 +7,27 @@ var prefix = ("C!")
 
 bot.on("guildMemberAdd", member => {
     let role = member.guild.roles.find("name", "נσυευя")
-    member.guild.channels.find("name", "bienvenue").send(`Hey ${member.user.username}, Bienvenue sur le discord de Le Royaume de Celestia !`)
-    member.addRole(role)
+    const embed = new Discord.RichEmbed()
+      .setColor('#800080')
+      .setAuthor(member.user.tag, member.user.avatarURL)
+      .setTitle("Un nouvel utilisateur vient d'arriver", `Il s'agit de [${member.user.tag}](https://discordapp.com/)`, true)
+      .addField("Comment connaitre mon fonctionnement ? ", "Je t'invite a exécuter la command : " + prefix )
+      .addField(`Nombre de membres après l'arrivée de ${member.user.tag}`, member.guild.memberCount)
+      .setTimestamp()
+member.guild.channels.find("name", bienvenuem).send({embed})    
+member.addRole(role)
+})
+
+bot.on("guildMemberRemove", member => {
+    const embed = new Discord.RichEmbed()
+    bot.user.setGame("Celestia | " + (bot.users.size - 1) + " Membre(s) ", "https://www.twitch.tv/Méliodas")
+    .setColor('#800080')
+    .setAuthor(member.user.tag, member.user.avatarURL)
+    .setTitle("Départ d'un utilisateur")
+    .addField("Il s'agit de : ", `[${member.user.tag}](https://discordapp.com/)`, true)
+    .addField(`Nombre de membres après le départ de ${member.user.tag}`, member.guild.memberCount)
+    .setTimestamp()
+    member.guild.channels.find("name", bienvenuem).send({embed})
 })
 
 
